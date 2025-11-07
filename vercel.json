@@ -2,19 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/node"
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/audit",
-      "dest": "/api/audit.js"
-    },
-    {
       "src": "/(.*)",
       "dest": "/public/$1"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/audit",
+      "destination": "/api/audit-proxy.js"
+    }
   ]
 }
-
