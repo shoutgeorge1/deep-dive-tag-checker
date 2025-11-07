@@ -1,21 +1,89 @@
-// run: node audit.js
+// run: node audit.js [urls.txt] [--config config.json] [--domain example.com]
 const fs = require('fs');
 const path = require('path');
 const { chromium, devices } = require('playwright');
 
-const DOMAIN = 'https://ocdentalspecialists.com';
-const MAX_PAGES = 500; // Increased for more pages
-// More flexible landing page patterns - matches more variations
-const LANDING_MATCH = /(\/landing\/|\/lp\/|\/promo|\/special|\/offer|\/book|\/contact|\/appointment|\/emergency|\/new-patient|\/locations|\/services|\/treatment|\/procedure|\/about|\/team|\/testimonial|\/review|\/blog\/|\/news\/|\/event)/i;
+// Default configuration
+let CONFIG = {
+  domain: 'https://ocdentalspecialists.com',
+  maxPages: 500,
+  landingPagePatterns: [
+    '/landing/', '/lp/', '/promo', '/special', '/offer', '/book',
+    '/contact', '/appointment', '/emergency', '/new-patient',
+    '/locations', '/services', '/treatment', '/procedure'
+  ],
+  knownIds: {
+    gtm: [],
+    ga4: [],
+    ads: []
+  },
+  devices: [null, 'iPhone 13']
+};
+
+// Parse command line arguments
+function parseArgs() {
+  const args = process.argv.slice(2);
+  let urlsFile = 'urls.txt';
+  let configFile = null;
+  let domain = null;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--config' && args[i + 1]) {
+      configFile = args[i + 1];
+      i++;
+    } else if (args[i] === '--domain' && args[i + 1]) {
+      domain = args[i + 1];
+      i++;
+    } else if (!args[i].startsWith('--')) {
+      urlsFile = args[i];
+    }
+  }
+
+  return { urlsFile, configFile, domain };
+}
+
+// Load configuration
+function loadConfig() {
+  const { urlsFile, configFile, domain } = parseArgs();
+  
+  // Load from config file if provided
+  if (configFile && fs.existsSync(configFile)) {
+    try {
+      const fileConfig = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
+      CONFIG = { ...CONFIG, ...fileConfig };
+      console.log(`Loaded config from ${configFile}`);
+    } catch (e) {
+      console.warn(`Failed to load config file: ${e.message}`);
+    }
+  } else if (fs.existsSync('config.json')) {
+    // Try default config.json
+    try {
+      const fileConfig = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
+      CONFIG = { ...CONFIG, ...fileConfig };
+      console.log('Loaded config from config.json');
+    } catch (e) {
+      // Ignore if no config.json
+    }
+  }
+
+  // Override domain from command line
+  if (domain) {
+    CONFIG.domain = domain.startsWith('http') ? domain : `https://${domain}`;
+  }
+
+  // Build landing page regex from patterns
+  const patternStr = CONFIG.landingPagePatterns.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  CONFIG.landingMatch = new RegExp(`(${patternStr})`, 'i');
+
+  return urlsFile;
+}
+
+const CUSTOM_URLS_FILE = loadConfig();
+const DOMAIN = CONFIG.domain;
+const MAX_PAGES = CONFIG.maxPages;
+const LANDING_MATCH = CONFIG.landingMatch;
 const GOOGLE_RE = /(googletagmanager|google-analytics|analytics\.google|googleadservices|doubleclick|googlesyndication)\.com/i;
-
-// Support for custom URL list file
-const CUSTOM_URLS_FILE = process.argv[2] || 'urls.txt';
-
-const DEVICES = [
-  null, // desktop default
-  'iPhone 13'
-];
+const DEVICES = CONFIG.devices;
 
 function outdir() {
   const d = path.join(__dirname, 'out');
@@ -527,8 +595,10 @@ function loadCustomUrls() {
 }
 
 async function main() {
-  console.log('Starting OC Dental tag audit...');
+  console.log('Starting Google Tag audit...');
+  console.log(`Domain: ${DOMAIN}`);
   console.log(`Using custom URLs file: ${CUSTOM_URLS_FILE}`);
+  console.log(`Max pages: ${MAX_PAGES}`);
   const outputDir = outdir();
   console.log(`Output directory: ${outputDir}`);
 
@@ -679,10 +749,11 @@ async function main() {
   }
 
   const md = [
-    '# OC Dental Tag Audit Findings',
+    '# Google Tag Audit Findings',
     '',
+    `**Domain:** ${DOMAIN}`,
     `**Audit Date:** ${new Date().toISOString()}`,
-    `**Total landing pages checked:** ${landing.length} pages × 2 devices = ${rows.length} device-views`,
+    `**Total landing pages checked:** ${landing.length} pages × ${DEVICES.length} devices = ${rows.length} device-views`,
     '',
     '## Summary of Issues',
     '',

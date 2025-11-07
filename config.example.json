@@ -1,0 +1,30 @@
+{
+  "domain": "https://example.com",
+  "maxPages": 500,
+  "landingPagePatterns": [
+    "/landing/",
+    "/lp/",
+    "/promo",
+    "/special",
+    "/offer",
+    "/book",
+    "/contact",
+    "/appointment",
+    "/emergency",
+    "/new-patient",
+    "/locations",
+    "/services",
+    "/treatment",
+    "/procedure"
+  ],
+  "knownIds": {
+    "gtm": ["GTM-XXXXXXX"],
+    "ga4": ["G-XXXXXXXXXX"],
+    "ads": ["AW-XXXXXXXXX"]
+  },
+  "devices": [
+    null,
+    "iPhone 13"
+  ]
+}
+

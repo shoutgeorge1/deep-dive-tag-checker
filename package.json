@@ -1,8 +1,11 @@
 {
-  "name": "oc-dental-tag-audit",
-  "version": "1.0.0",
-  "description": "Comprehensive Google Tag audit for OC Dental landing pages",
+  "name": "google-tag-audit",
+  "version": "2.0.0",
+  "description": "Comprehensive Google Tag audit tool for any website - detects GTM, GA4, and Google Ads issues",
   "main": "audit.js",
+  "bin": {
+    "tag-audit": "./audit.js"
+  },
   "scripts": {
     "start": "node audit.js",
     "audit": "node audit.js"

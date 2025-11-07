@@ -1,106 +1,93 @@
-# OC Dental Tag Audit Tool
+# Google Tag Audit Tool
 
-Comprehensive Google Tag audit crawler for OC Dental landing pages. This tool crawls all landing pages on `ocdentalspecialists.com`, identifies Google Tag Manager (GTM), Google Analytics 4 (GA4), and Google Ads tracking issues, and verifies phone call conversion tracking.
+A comprehensive, automated tool to audit Google Tag Manager (GTM), Google Analytics 4 (GA4), and Google Ads tracking across your website's landing pages. Detects duplicate tags, missing conversions, script loading issues, and phone call tracking problems.
 
-## Features
+## ✨ Features
 
-- **Comprehensive URL Discovery**: Fetches sitemap.xml, crawls internal links, and filters landing pages
-- **Dual Device Testing**: Tests each page on both desktop and mobile (iPhone 13)
+- **Comprehensive URL Discovery**: Fetches sitemap.xml, crawls internal links, or uses your custom URL list
+- **Dual Device Testing**: Tests each page on both desktop and mobile
 - **Tag Detection**: Identifies GTM, GA4, and Google Ads IDs from HTML and JavaScript
 - **Duplicate Detection**: Finds duplicate tag configurations and event fires
 - **Network Monitoring**: Tracks timing of first GTM, GA4, and Ads requests
 - **Consent Mode Analysis**: Detects Consent Mode defaults and updates
 - **Phone Call Tracking**: Verifies tel: links and call conversion events
 - **Script Deferrer Detection**: Identifies performance optimizers that delay tag loading
+- **Flexible Configuration**: Works for any website with configurable patterns
 
-## Prerequisites
+## 🚀 Quick Start
 
-- Node.js 18 or higher
-- npm or yarn
-
-## Installation
+### Installation
 
 ```bash
 npm install
+npx playwright install chromium
 ```
 
-This will install Playwright and its browser dependencies.
-
-## Usage
-
-### Quick Start (Auto-Discover)
+### Basic Usage
 
 ```bash
+# Auto-discover landing pages
 npm start
-# or
-node audit.js
+
+# Use your own URL list
+npm start my-urls.txt
+
+# Specify a domain
+npm start -- --domain example.com
+
+# Use a config file
+npm start -- --config config.json
 ```
 
-The audit will:
-1. Fetch and parse sitemap.xml
-2. Crawl the site to discover landing pages
-3. Audit each landing page on desktop and mobile
-4. Generate reports in the `./out` directory
+## 📋 Configuration
 
-### Use Your Own URL List (Recommended for Many Pages)
-
-Create a `urls.txt` file with all your landing page URLs:
+### Option 1: Command Line Arguments
 
 ```bash
-# Create urls.txt
-cat > urls.txt << EOF
-https://ocdentalspecialists.com/appointment-request/
-https://ocdentalspecialists.com/emergency-dentist/
-https://ocdentalspecialists.com/contact-us/
-# Add as many as you need...
-EOF
-
-# Run the audit
-npm start
+node audit.js urls.txt --domain example.com --config config.json
 ```
 
-Or specify a different file:
-```bash
-node audit.js my-landing-pages.txt
+### Option 2: Config File (Recommended)
+
+Create a `config.json` file:
+
+```json
+{
+  "domain": "https://example.com",
+  "maxPages": 500,
+  "landingPagePatterns": [
+    "/landing/",
+    "/lp/",
+    "/contact",
+    "/appointment"
+  ],
+  "knownIds": {
+    "gtm": ["GTM-XXXXXXX"],
+    "ga4": ["G-XXXXXXXXXX"],
+    "ads": ["AW-XXXXXXXXX"]
+  },
+  "devices": [null, "iPhone 13"]
+}
 ```
 
-**See `USAGE.md` for detailed instructions on getting your landing page URLs from Google Analytics, Search Console, or your CMS.**
+See `config.example.json` for a complete example.
 
-## Output Files
+### Option 3: URL List File
+
+Create a `urls.txt` file with one URL per line:
+
+```
+https://example.com/page1/
+https://example.com/page2/
+/contact-us/
+```
+
+## 📊 Output Files
 
 All results are saved to the `./out` directory:
 
-### `landing_urls.json`
-Complete list of all landing pages that were audited.
-
 ### `summary.csv`
-Page-by-page summary with columns:
-- `url`: Page URL
-- `device`: desktop or iPhone 13
-- `gtm_ids`: Array of GTM container IDs found
-- `ga4_ids`: Array of GA4 measurement IDs found
-- `ads_ids`: Array of Google Ads conversion IDs found
-- `gtm_and_gtag_both`: Boolean - both GTM and hardcoded gtag present
-- `dup_ga4_config`: Boolean - duplicate GA4 configurations detected
-- `dup_ads_config`: Boolean - duplicate Ads configurations detected
-- `page_view_dupe`: Boolean - multiple page_view events fired
-- `conversion_dupe`: Boolean - multiple conversion events fired
-- `consent_default`: Boolean - Consent Mode defaulted
-- `consent_updated`: Boolean - Consent Mode updated
-- `first_gtm_ms`: Milliseconds until first GTM request
-- `first_ga4_ms`: Milliseconds until first GA4 request
-- `first_aw_ms`: Milliseconds until first Ads request
-- `script_deferrer_detected`: Boolean - script deferrer detected
-- `tel_links`: Number of tel: links found
-- `call_tracking_found`: Boolean - call tracking service detected
-- `call_event_seen`: Boolean - call event fired on tel: click
-- `notes`: Additional notes or errors
-
-### Individual JSON Files (per page/device)
-- `network_{hash}_{device}.json`: All Google-related network requests with timestamps
-- `datalayer_{hash}_{device}.json`: All dataLayer.push() calls
-- `gtag_{hash}_{device}.json`: All gtag() function calls
-- `dom_{hash}_{device}.json`: DOM analysis including IDs, consent info, tel links
+Page-by-page summary with all detected issues
 
 ### `findings.md`
 Handoff-ready summary report with:
@@ -108,51 +95,110 @@ Handoff-ready summary report with:
 - Minimal fix steps for developers
 - Example URLs for each issue type
 
-## Known IDs to Watch
+### Individual JSON Files (per page/device)
+- `network_{hash}_{device}.json`: All Google-related network requests
+- `datalayer_{hash}_{device}.json`: All dataLayer.push() calls
+- `gtag_{hash}_{device}.json`: All gtag() function calls
+- `dom_{hash}_{device}.json`: DOM analysis including IDs, consent info, tel links
 
-The tool specifically watches for:
-- **GTM**: `GTM-W77KHST`
-- **GA4**: `G-MQDHL2Y4YF`, `G-VK6W65HQRE`
-- **Ads**: `AW-721294688`
+## 🔍 What Gets Audited
 
-## Landing Page Patterns
+1. **Duplicate Tag Loaders**: GTM + hardcoded gtag on same page
+2. **Duplicate Configurations**: Same GA4 or Ads ID configured multiple times
+3. **Duplicate Events**: Multiple page_view or conversion events
+4. **Consent Mode Issues**: Defaulted but never updated
+5. **Script Loading Delays**: Deferrers/optimizers delaying tags
+6. **Phone Call Tracking**: tel: links without conversion events
+7. **Network Timing**: Time to first GTM, GA4, and Ads requests
 
-Pages matching these URL patterns are considered landing pages:
-- `/landing/`
-- `/lp/`
-- `/promo`
-- `/special`
-- `/offer`
-- `/book`
-- `/contact`
-- `/appointment`
-- `/emergency`
-- `/new-patient`
+## 🎯 Use Cases
 
-## Configuration
+- **Marketing Teams**: Verify conversion tracking is working correctly
+- **Web Developers**: Identify and fix tag implementation issues
+- **SEO Agencies**: Audit client websites for tracking problems
+- **E-commerce Sites**: Ensure purchase and conversion events fire correctly
+- **Lead Generation**: Verify phone call and form submission tracking
 
-Edit `audit.js` to modify:
-- `DOMAIN`: Target domain (default: `https://ocdentalspecialists.com`)
-- `MAX_PAGES`: Maximum pages to audit (default: 200)
-- `LANDING_MATCH`: Regex pattern for landing page URLs
-- `DEVICES`: Array of devices to test (default: desktop + iPhone 13)
+## 📖 Examples
 
-## Troubleshooting
+### Audit a specific domain
 
-**Playwright browsers not installed:**
 ```bash
-npx playwright install chromium
+node audit.js --domain mysite.com
 ```
 
-**Timeout errors:**
-- Some pages may be slow to load. The tool will continue with other pages if one fails.
-- Check `notes` column in summary.csv for error details.
+### Use custom landing page patterns
 
-**Memory issues with large sites:**
-- Reduce `MAX_PAGES` in audit.js
-- Process pages in smaller batches
+```json
+{
+  "landingPagePatterns": [
+    "/product/",
+    "/checkout/",
+    "/thank-you"
+  ]
+}
+```
 
-## License
+### Get URLs from Google Analytics
+
+1. Export landing pages from GA4
+2. Save to `urls.txt`
+3. Run: `npm start urls.txt`
+
+## 🛠️ Advanced Usage
+
+### Custom Device Testing
+
+Edit `config.json`:
+
+```json
+{
+  "devices": [
+    null,
+    "iPhone 13",
+    "iPad Pro",
+    "Desktop Chrome"
+  ]
+}
+```
+
+### Increase Page Limit
+
+```json
+{
+  "maxPages": 1000
+}
+```
+
+### Watch for Specific IDs
+
+```json
+{
+  "knownIds": {
+    "gtm": ["GTM-ABC123"],
+    "ga4": ["G-XYZ789"],
+    "ads": ["AW-123456"]
+  }
+}
+```
+
+## 📚 Documentation
+
+- **`USAGE.md`**: Detailed usage instructions
+- **`QUICK_START.md`**: Quick setup guide
+- **`DEPLOYMENT.md`**: Deployment options (GitHub Actions, Vercel, etc.)
+
+## 🤝 Contributing
+
+This tool is designed to be generic and work for any website. Feel free to:
+- Add more landing page patterns
+- Improve detection algorithms
+- Add support for other analytics platforms
+
+## 📝 License
 
 MIT
 
+## 🙏 Credits
+
+Originally built for OC Dental, now generalized for any website.
