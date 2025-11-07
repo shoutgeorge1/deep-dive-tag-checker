@@ -1,0 +1,18 @@
+🔍 I built a free Google Tag audit tool that helps marketers and developers find tracking issues on their websites!
+
+It automatically detects:
+✅ Duplicate GTM/GA4 tags
+✅ Missing conversion events  
+✅ Script loading problems
+✅ Phone call tracking issues
+
+100% free and open source. Check it out:
+
+https://github.com/shoutgeorge1/deep-dive-tag-checker
+
+#MarketingTools #WebDevelopment #GoogleAnalytics #GTM #OpenSource #FreeTools
+
+---
+
+(If you deploy to Render, add your live link here too!)
+
