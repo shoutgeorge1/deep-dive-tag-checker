@@ -4,3 +4,6 @@ out/
 .DS_Store
 config.json
 urls.txt
+temp-*.json
+temp-*.txt
+public/results/

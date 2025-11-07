@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC Dental Tag Audit</title>
+    <title>Google Tag Audit Tool</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 2rem 1rem;
         }
         .container {
             max-width: 900px;
@@ -27,10 +27,151 @@
         h1 {
             color: #333;
             margin-bottom: 0.5rem;
+            font-size: 2rem;
         }
         .subtitle {
             color: #666;
             margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="url"], textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            min-height: 150px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .help-text {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 1rem;
+            margin-top: 1rem;
+        }
+        .button:hover:not(:disabled) {
+            background: #5568d3;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .button-secondary {
+            background: #6c757d;
+        }
+        .button-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+        .status {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+        }
+        .status.show {
+            display: block;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .status.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .progress {
+            margin-top: 1rem;
+            display: none;
+        }
+        .progress.show {
+            display: block;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            font-size: 0.875rem;
+            color: #666;
+            text-align: center;
+        }
+        .results {
+            margin-top: 2rem;
+            display: none;
+        }
+        .results.show {
+            display: block;
+        }
+        .results h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .results-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .results-links a {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .results-links a:hover {
+            background: #5568d3;
         }
         .info-box {
             background: #f8f9fa;
@@ -46,128 +187,219 @@
         .info-box p {
             color: #666;
             line-height: 1.6;
+            font-size: 0.9rem;
         }
-        .button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-right: 1rem;
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
             margin-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
         }
-        .button:hover {
-            background: #5568d3;
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 1rem;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
         }
-        .button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 500;
         }
-        .status {
-            margin-top: 2rem;
-            padding: 1rem;
-            border-radius: 6px;
+        .tab-content {
             display: none;
         }
-        .status.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        .status.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        .status.info {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-        }
-        .code-block {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 1rem;
-            border-radius: 6px;
-            overflow-x: auto;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-        .links {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #eee;
-        }
-        .links a {
-            color: #667eea;
-            text-decoration: none;
-            margin-right: 1.5rem;
-        }
-        .links a:hover {
-            text-decoration: underline;
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔍 Google Tag Audit Tool</h1>
-        <p class="subtitle">Comprehensive Google Tag audit for any website</p>
+        <p class="subtitle">Audit GTM, GA4, and Google Ads tracking on any website</p>
         
         <div class="info-box">
-            <h3>📋 About This Tool</h3>
+            <h3>📋 How It Works</h3>
             <p>
-                This tool crawls landing pages on <strong>any website</strong>, 
-                identifies Google Tag Manager (GTM), Google Analytics 4 (GA4), and Google Ads tracking issues, 
-                and verifies phone call conversion tracking. Works for any company or website.
+                Enter your website domain or provide a list of URLs. The tool will crawl your landing pages,
+                detect Google Tag issues, and generate a comprehensive report. Results are saved and available for download.
             </p>
         </div>
 
-        <div class="info-box">
-            <h3>⚠️ Running the Audit</h3>
-            <p>
-                <strong>Note:</strong> This audit tool uses Playwright which requires a full browser environment. 
-                For best results, run it locally or on a dedicated server (Railway, Render, etc.).
-            </p>
-            <div class="code-block">
-# Install dependencies<br>
-npm install<br><br>
-# Run the audit<br>
-npm start<br><br>
-# Results will be in ./out/ directory
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('domain')">Domain</button>
+            <button class="tab" onclick="switchTab('urls')">URL List</button>
+        </div>
+
+        <form id="auditForm">
+            <div class="tab-content active" id="domain-tab">
+                <div class="form-group">
+                    <label for="domain">Website Domain *</label>
+                    <input type="url" id="domain" name="domain" placeholder="https://example.com" required>
+                    <div class="help-text">Enter your full website URL (include https://)</div>
+                </div>
             </div>
-        </div>
 
-        <div class="info-box">
-            <h3>📊 What Gets Audited</h3>
-            <ul style="margin-left: 1.5rem; color: #666; line-height: 1.8;">
-                <li>GTM, GA4, and Google Ads tag configurations</li>
-                <li>Duplicate tag loaders and configurations</li>
-                <li>Script loading delays and deferrers</li>
-                <li>Consent Mode implementation</li>
-                <li>Phone call conversion tracking</li>
-                <li>Network request timing</li>
-            </ul>
-        </div>
+            <div class="tab-content" id="urls-tab">
+                <div class="form-group">
+                    <label for="urls">Landing Page URLs</label>
+                    <textarea id="urls" name="urls" placeholder="https://example.com/page1/&#10;https://example.com/page2/&#10;https://example.com/page3/"></textarea>
+                    <div class="help-text">Enter one URL per line. If empty, the tool will auto-discover landing pages.</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="maxPages">Max Pages to Audit</label>
+                <input type="text" id="maxPages" name="maxPages" value="100" placeholder="100">
+                <div class="help-text">Maximum number of pages to audit (default: 100)</div>
+            </div>
+
+            <button type="submit" class="button" id="submitBtn">Start Audit</button>
+            <button type="button" class="button button-secondary" onclick="resetForm()">Reset</button>
+        </form>
 
         <div class="status" id="status"></div>
 
-        <div class="links">
-            <a href="https://github.com" target="_blank">View on GitHub</a>
-            <a href="/out/findings.md" target="_blank">Latest Findings</a>
-            <a href="/out/summary.csv" target="_blank">Summary CSV</a>
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Initializing...</div>
+        </div>
+
+        <div class="results" id="results">
+            <h2>✅ Audit Complete!</h2>
+            <p>Your audit results are ready. Download the reports below:</p>
+            <div class="results-links">
+                <a href="#" id="findingsLink" target="_blank">📊 View Findings Report</a>
+                <a href="#" id="summaryLink" target="_blank">📈 Download Summary CSV</a>
+                <a href="#" id="jsonLink" target="_blank">📁 Download All Data (ZIP)</a>
+            </div>
         </div>
     </div>
 
     <script>
-        // Simple status handler if API is implemented
-        document.addEventListener('DOMContentLoaded', () => {
-            // Future: Add API call functionality here
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        function resetForm() {
+            document.getElementById('auditForm').reset();
+            document.getElementById('status').classList.remove('show');
+            document.getElementById('progress').classList.remove('show');
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status ${type} show`;
+            status.textContent = message;
+        }
+
+        function updateProgress(percent, text) {
+            const progress = document.getElementById('progress');
+            progress.classList.add('show');
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        document.getElementById('auditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('progress').classList.remove('show');
+            
+            const formData = new FormData(e.target);
+            const domain = formData.get('domain');
+            const urls = formData.get('urls');
+            const maxPages = formData.get('maxPages') || '100';
+
+            // Validate domain
+            if (!domain && !urls) {
+                showStatus('Please enter a domain or URL list', 'error');
+                submitBtn.disabled = false;
+                return;
+            }
+
+            showStatus('Starting audit... This may take several minutes.', 'info');
+            updateProgress(10, 'Preparing audit...');
+
+            try {
+                const response = await fetch('/api/audit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        domain: domain || null,
+                        urls: urls ? urls.split('\n').filter(u => u.trim()) : null,
+                        maxPages: parseInt(maxPages) || 100
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                
+                                if (data.type === 'progress') {
+                                    updateProgress(data.percent, data.message);
+                                } else if (data.type === 'complete') {
+                                    updateProgress(100, 'Audit complete!');
+                                    showStatus('Audit completed successfully!', 'success');
+                                    
+                                    // Show results
+                                    document.getElementById('results').classList.add('show');
+                                    document.getElementById('findingsLink').href = data.findingsUrl;
+                                    document.getElementById('summaryLink').href = data.summaryUrl;
+                                    document.getElementById('jsonLink').href = data.jsonUrl;
+                                    
+                                    submitBtn.disabled = false;
+                                } else if (data.type === 'error') {
+                                    showStatus(data.message, 'error');
+                                    submitBtn.disabled = false;
+                                }
+                            } catch (e) {
+                                // Ignore parse errors
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                submitBtn.disabled = false;
+            }
         });
     </script>
 </body>
 </html>
-

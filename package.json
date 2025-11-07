@@ -8,12 +8,16 @@
   },
   "scripts": {
     "start": "node audit.js",
-    "audit": "node audit.js"
+    "audit": "node audit.js",
+    "server": "node server.js",
+    "dev": "node server.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "archiver": "^6.0.2",
+    "express": "^4.21.2",
     "playwright": "^1.40.0"
   },
   "keywords": [
@@ -25,4 +29,3 @@
   "author": "",
   "license": "MIT"
 }
-
