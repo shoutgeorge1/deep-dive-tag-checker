@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OC Dental Tag Audit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 2rem;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+        .button:hover {
+            background: #5568d3;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .links {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 1.5rem;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 OC Dental Tag Audit Tool</h1>
+        <p class="subtitle">Comprehensive Google Tag audit for landing pages</p>
+        
+        <div class="info-box">
+            <h3>📋 About This Tool</h3>
+            <p>
+                This tool crawls all landing pages on <strong>ocdentalspecialists.com</strong>, 
+                identifies Google Tag Manager (GTM), Google Analytics 4 (GA4), and Google Ads tracking issues, 
+                and verifies phone call conversion tracking.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <h3>⚠️ Running the Audit</h3>
+            <p>
+                <strong>Note:</strong> This audit tool uses Playwright which requires a full browser environment. 
+                For best results, run it locally or on a dedicated server (Railway, Render, etc.).
+            </p>
+            <div class="code-block">
+# Install dependencies<br>
+npm install<br><br>
+# Run the audit<br>
+npm start<br><br>
+# Results will be in ./out/ directory
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>📊 What Gets Audited</h3>
+            <ul style="margin-left: 1.5rem; color: #666; line-height: 1.8;">
+                <li>GTM, GA4, and Google Ads tag configurations</li>
+                <li>Duplicate tag loaders and configurations</li>
+                <li>Script loading delays and deferrers</li>
+                <li>Consent Mode implementation</li>
+                <li>Phone call conversion tracking</li>
+                <li>Network request timing</li>
+            </ul>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="links">
+            <a href="https://github.com" target="_blank">View on GitHub</a>
+            <a href="/out/findings.md" target="_blank">Latest Findings</a>
+            <a href="/out/summary.csv" target="_blank">Summary CSV</a>
+        </div>
+    </div>
+
+    <script>
+        // Simple status handler if API is implemented
+        document.addEventListener('DOMContentLoaded', () => {
+            // Future: Add API call functionality here
+        });
+    </script>
+</body>
+</html>
+

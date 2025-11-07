@@ -1,0 +1,25 @@
+{
+  "name": "oc-dental-tag-audit",
+  "version": "1.0.0",
+  "description": "Comprehensive Google Tag audit for OC Dental landing pages",
+  "main": "audit.js",
+  "scripts": {
+    "start": "node audit.js",
+    "audit": "node audit.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "keywords": [
+    "google-analytics",
+    "gtm",
+    "audit",
+    "crawler"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
