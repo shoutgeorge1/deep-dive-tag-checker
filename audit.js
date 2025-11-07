@@ -4,9 +4,13 @@ const path = require('path');
 const { chromium, devices } = require('playwright');
 
 const DOMAIN = 'https://ocdentalspecialists.com';
-const MAX_PAGES = 200;
-const LANDING_MATCH = /(\/landing\/|\/lp\/|\/promo|\/special|\/offer|\/book|\/contact|\/appointment|\/emergency|\/new-patient)/i;
+const MAX_PAGES = 500; // Increased for more pages
+// More flexible landing page patterns - matches more variations
+const LANDING_MATCH = /(\/landing\/|\/lp\/|\/promo|\/special|\/offer|\/book|\/contact|\/appointment|\/emergency|\/new-patient|\/locations|\/services|\/treatment|\/procedure|\/about|\/team|\/testimonial|\/review|\/blog\/|\/news\/|\/event)/i;
 const GOOGLE_RE = /(googletagmanager|google-analytics|analytics\.google|googleadservices|doubleclick|googlesyndication)\.com/i;
+
+// Support for custom URL list file
+const CUSTOM_URLS_FILE = process.argv[2] || 'urls.txt';
 
 const DEVICES = [
   null, // desktop default
@@ -67,7 +71,7 @@ async function crawlLandingUrls(context) {
   const q = [DOMAIN];
   const collected = new Set();
   let depth = 0;
-  const maxDepth = 2;
+  const maxDepth = 3; // Increased depth to find more pages
 
   async function enqueue(url) {
     if (!url.startsWith(DOMAIN)) return;
@@ -77,7 +81,7 @@ async function crawlLandingUrls(context) {
     q.push(u);
   }
 
-  while (q.length && seen.size < 800 && depth <= maxDepth) {
+  while (q.length && seen.size < 2000 && depth <= maxDepth) { // Increased limit
     const currentLevel = q.length;
     depth++;
     
@@ -484,26 +488,78 @@ async function auditUrl(context, url, deviceLabel) {
   };
 }
 
+function loadCustomUrls() {
+  const urls = new Set();
+  
+  // Try to load from file
+  if (fs.existsSync(CUSTOM_URLS_FILE)) {
+    console.log(`Loading custom URLs from ${CUSTOM_URLS_FILE}...`);
+    const content = fs.readFileSync(CUSTOM_URLS_FILE, 'utf-8');
+    const lines = content.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    
+    lines.forEach(line => {
+      // Support both plain URLs and JSON arrays
+      if (line.startsWith('[')) {
+        try {
+          const jsonUrls = JSON.parse(line);
+          jsonUrls.forEach(u => {
+            if (u && typeof u === 'string' && (u.startsWith('http') || u.startsWith('/'))) {
+              const fullUrl = u.startsWith('http') ? u : `${DOMAIN}${u}`;
+              urls.add(fullUrl.split('#')[0].split('?')[0]);
+            }
+          });
+        } catch (e) {
+          // Not valid JSON, treat as plain URL
+        }
+      } else {
+        // Plain URL
+        if (line.startsWith('http') || line.startsWith('/')) {
+          const fullUrl = line.startsWith('http') ? line : `${DOMAIN}${line}`;
+          urls.add(fullUrl.split('#')[0].split('?')[0]);
+        }
+      }
+    });
+    
+    console.log(`Loaded ${urls.size} custom URLs from file`);
+  }
+  
+  return Array.from(urls);
+}
+
 async function main() {
   console.log('Starting OC Dental tag audit...');
+  console.log(`Using custom URLs file: ${CUSTOM_URLS_FILE}`);
   const outputDir = outdir();
   console.log(`Output directory: ${outputDir}`);
 
+  // Load custom URLs first
+  const customUrls = loadCustomUrls();
+  
   const browser = await chromium.launch({ headless: true });
   const baseContext = await browser.newContext();
 
-  console.log('Fetching sitemap...');
-  const sitemap = await getSitemapUrls(baseContext);
-  console.log(`Found ${sitemap.length} URLs in sitemap`);
+  let landing = [];
+  
+  if (customUrls.length > 0) {
+    // If custom URLs provided, use those (optionally filter by pattern)
+    console.log(`Using ${customUrls.length} custom URLs`);
+    landing = customUrls.slice(0, MAX_PAGES);
+  } else {
+    // Otherwise, discover URLs
+    console.log('Fetching sitemap...');
+    const sitemap = await getSitemapUrls(baseContext);
+    console.log(`Found ${sitemap.length} URLs in sitemap`);
 
-  console.log('Crawling landing pages...');
-  const discoveredLanding = await crawlLandingUrls(baseContext);
-  console.log(`Discovered ${discoveredLanding.length} landing pages via crawl`);
+    console.log('Crawling landing pages...');
+    const discoveredLanding = await crawlLandingUrls(baseContext);
+    console.log(`Discovered ${discoveredLanding.length} landing pages via crawl`);
 
-  const landing = Array.from(new Set([
-    ...sitemap.filter(u => LANDING_MATCH.test(u)),
-    ...discoveredLanding
-  ])).slice(0, MAX_PAGES);
+    landing = Array.from(new Set([
+      ...sitemap.filter(u => LANDING_MATCH.test(u)),
+      ...discoveredLanding,
+      ...customUrls // Include custom URLs even if we're also discovering
+    ])).slice(0, MAX_PAGES);
+  }
 
   console.log(`Total unique landing pages to audit: ${landing.length}`);
 

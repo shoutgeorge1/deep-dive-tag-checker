@@ -28,6 +28,8 @@ This will install Playwright and its browser dependencies.
 
 ## Usage
 
+### Quick Start (Auto-Discover)
+
 ```bash
 npm start
 # or
@@ -39,6 +41,30 @@ The audit will:
 2. Crawl the site to discover landing pages
 3. Audit each landing page on desktop and mobile
 4. Generate reports in the `./out` directory
+
+### Use Your Own URL List (Recommended for Many Pages)
+
+Create a `urls.txt` file with all your landing page URLs:
+
+```bash
+# Create urls.txt
+cat > urls.txt << EOF
+https://ocdentalspecialists.com/appointment-request/
+https://ocdentalspecialists.com/emergency-dentist/
+https://ocdentalspecialists.com/contact-us/
+# Add as many as you need...
+EOF
+
+# Run the audit
+npm start
+```
+
+Or specify a different file:
+```bash
+node audit.js my-landing-pages.txt
+```
+
+**See `USAGE.md` for detailed instructions on getting your landing page URLs from Google Analytics, Search Console, or your CMS.**
 
 ## Output Files
 

@@ -1,0 +1,18 @@
+# Custom URL List for Tag Audit
+# Add one URL per line, or use JSON array format
+# Lines starting with # are ignored
+# URLs can be full URLs or paths (paths will be prefixed with the domain)
+
+# Example full URLs:
+https://ocdentalspecialists.com/appointment-request/
+https://ocdentalspecialists.com/emergency-dentist/
+
+# Example paths (will be converted to full URLs):
+/contact-us/
+/specials/
+/landing/summer-promo/
+/lp/teeth-whitening/
+
+# Or use JSON array format on a single line:
+# ["https://ocdentalspecialists.com/page1/", "https://ocdentalspecialists.com/page2/"]
+
