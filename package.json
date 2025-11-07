@@ -10,7 +10,9 @@
     "start": "node audit.js",
     "audit": "node audit.js",
     "server": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "setup": "npm install && npx playwright install chromium",
+    "fix-browser": "npx playwright install chromium --force"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,0 +1,11 @@
+node_modules
+out
+.git
+.DS_Store
+*.log
+config.json
+urls.txt
+temp-*.json
+temp-*.txt
+public/results
+

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  tag-audit:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./out:/app/out
+      - ./public/results:/app/public/results
+    environment:
+      - NODE_ENV=production
+
